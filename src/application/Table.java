@@ -65,30 +65,15 @@ public class Table extends Application implements Runnable {
     }
     xlist = new ArrayList<>();
     olist = new ArrayList<>();
-//    Button rePlay = new Button("再来一局");
     BorderPane borderPaneForButton = new BorderPane();
     borderPaneForButton.setCenter(lblStatus);
     borderPaneForButton.setRight(gameset);
     borderPaneForButton.setLeft(connection);
     lblStatus.setPadding(new Insets(5));
-
     BorderPane borderPane = new BorderPane();
     borderPane.setCenter(pane);
     borderPane.setBottom(borderPaneForButton);
-
-//    rePlay.setOnAction(event -> {
-//      pane.getChildren().clear();
-//      for (int i = 0; i < 3; i++) {
-//        for (int j = 0; j < 3; j++) {
-//          pane.add(cells[i][j] = new Cell(), j, i);
-//        }
-//      }
-//      xlist.clear();
-//      olist.clear();
-//      whoseTurn = 'X';
-//      lblStatus.setText("X's turn to play");
-//    });
-    connection.setOnAction(event ->{
+    connection.setOnAction(event -> {
           connectAction();
         }
     );
@@ -107,7 +92,7 @@ public class Table extends Application implements Runnable {
       //显示对话框
       Optional<ButtonType> result = alert2.showAndWait();
       //如果点击OK
-      if (result.get() == ButtonType.OK){
+      if (result.get() == ButtonType.OK) {
         // ... user chose OK
         primaryStage.close();
         System.exit(0);
@@ -146,75 +131,74 @@ public class Table extends Application implements Runnable {
 
 
   public void connectAction() {
-      if (!isServerClose(socket)) {
-        try {
-          socket.close();
-          System.out.println("正在断开连接" +"\n" + socket.isClosed());
-          isConnect = false;
+    if (!isServerClose(socket)) {
+      try {
+        socket.close();
+        System.out.println("正在断开连接" + "\n" + socket.isClosed());
+        isConnect = false;
 
-        } catch (IOException ioException) {
-          ioException.printStackTrace();
-        }
-        connection.setText("connect");
-      } else {
-        if (doConnect()) {
-          thread = new Thread(this);
-          thread.start();
-          System.out.println("已连接服务器");
-          connection.setText("disconnect");
-
-          isConnect = true;
-        }
+      } catch (IOException ioException) {
+        ioException.printStackTrace();
       }
+      connection.setText("connect");
+    } else {
+      if (doConnect()) {
+        thread = new Thread(this);
+        thread.start();
+        System.out.println("已连接服务器");
+        connection.setText("disconnect");
+
+        isConnect = true;
+      }
+    }
   }
 
   public void run() {
     System.out.println("启动监听");
     while (true) {
       System.out.println("...");
-      if (isServerClose(socket)){
+      if (isServerClose(socket)) {
         System.out.println("服务器断开");
         break;
       } else {
         try {
           result = in.readUTF();  //堵塞状态，除非读取到信息
           System.out.println("收到服务器应答" + result);
-          if (result.contains("rank")){
-            rank = result.substring(result.length()-1);
-            if (rank.equals("X")){
+          if (result.contains("rank")) {
+            rank = result.substring(result.length() - 1);
+            if (rank.equals("X")) {
               System.out.println("等待对手......");
 
-            Platform.runLater(() ->{
-              lblStatus.setText("you are "+ rank+ "  waiting...");
-            });
-            }else {
-              Platform.runLater(() ->{
-                lblStatus.setText("you are "+ rank);
+              Platform.runLater(() -> {
+                lblStatus.setText("you are " + rank + "  waiting...");
+              });
+            } else {
+              Platform.runLater(() -> {
+                lblStatus.setText("you are " + rank);
               });
             }
-          }else if (result.contains("won")){
-            Platform.runLater(() ->{
+          } else if (result.contains("won")) {
+            Platform.runLater(() -> {
               lblStatus.setText("Game Over");
             });
             whoseTurn = ' ';
-          }else if (result.contains("fill")){
-            Platform.runLater(() ->{
+          } else if (result.contains("fill")) {
+            Platform.runLater(() -> {
               lblStatus.setText("Draw! The game is over!");
             });
             whoseTurn = ' ';
-          }else if (result.contains("leave")){
-            Platform.runLater(() ->{
+          } else if (result.contains("leave")) {
+            Platform.runLater(() -> {
               lblStatus.setText("Your opponent quit the game");
             });
             whoseTurn = ' ';
-          }else if (result.contains("set")){
+          } else if (result.contains("set")) {
             String gset = result.split(":")[1];
             Platform.runLater(() -> {
-              gameset.setText("Game: "+ gset + " you are " + rank);
+              gameset.setText("Game: " + gset + " you are " + rank);
               lblStatus.setText("Game start");
             });
-          }
-          else {
+          } else {
             if (result.split(";").length == 2) {
               String xstr = result.split(";")[0];
               String ostr = result.split(";")[1];
@@ -227,7 +211,7 @@ public class Table extends Application implements Runnable {
                 int y = Integer.parseInt(str.substring(1));
                 if (cells[x][y].getToken() == ' ' && whoseTurn != ' ') {
                   whoseTurn = (whoseTurn == 'X') ? 'O' : 'X';
-                  Platform.runLater(() ->{
+                  Platform.runLater(() -> {
                     cells[x][y].setToken('X');
                     lblStatus.setText(whoseTurn + "'s turn");
                   });
@@ -238,7 +222,7 @@ public class Table extends Application implements Runnable {
                 int y = Integer.parseInt(str.substring(1));
                 if (cells[x][y].getToken() == ' ' && whoseTurn != ' ') {
                   whoseTurn = (whoseTurn == 'X') ? 'O' : 'X';
-                  Platform.runLater(() ->{
+                  Platform.runLater(() -> {
                     cells[x][y].setToken('O');
                     lblStatus.setText(whoseTurn + "'s turn");
                   });
@@ -246,16 +230,16 @@ public class Table extends Application implements Runnable {
 
               }
 
-            }else {//first
+            } else {//first
               String xstr = result.split(";")[0];
               String[] xq = xstr.split(",");
               xlist.addAll(Arrays.asList(xq));
               for (String str : xlist) {
                 int x = Integer.parseInt(str.substring(0, 1));
                 int y = Integer.parseInt(str.substring(1));
-                if (cells[x][y].getToken() == ' '  && whoseTurn != ' ') {
+                if (cells[x][y].getToken() == ' ' && whoseTurn != ' ') {
                   whoseTurn = (whoseTurn == 'X') ? 'O' : 'X';
-                  Platform.runLater(() ->{
+                  Platform.runLater(() -> {
                     cells[x][y].setToken('X');
                     lblStatus.setText(whoseTurn + "'s turn");
                   });
@@ -382,12 +366,12 @@ public class Table extends Application implements Runnable {
               }
             }
           }
-          String s ;
-          if (os.length() == 0){
+          String s;
+          if (os.length() == 0) {
             s = xs.append(";").toString();
-            s = s.substring(0,s.length()-2) + s.substring(s.length()-1);
-          }else {
-            s = xs.deleteCharAt(xs.length()-1).append(";").append(os).toString();
+            s = s.substring(0, s.length() - 2) + s.substring(s.length() - 1);
+          } else {
+            s = xs.deleteCharAt(xs.length() - 1).append(";").append(os).toString();
             s = s.substring(0, s.length() - 1);
           }
           out.writeUTF(s);
